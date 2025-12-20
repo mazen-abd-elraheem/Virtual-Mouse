@@ -3,7 +3,7 @@ AI Virtual Mouse Controller - Two-Hand Edition v5.4 (DISCRETE GESTURES)
 A real-time dual-hand gesture-based mouse controller using computer vision.
 
 Author: Senior Python Developer & CV Engineer
-Date: December 2024
+Date: December 2025
 
 UPDATES in v5.4:
 - SCROLL: 1 finger = scroll UP, 2 fingers = scroll DOWN
