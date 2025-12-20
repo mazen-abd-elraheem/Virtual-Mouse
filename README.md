@@ -111,4 +111,4 @@ This code is provided as-is for educational and commercial use.
 ## Author
 
 Senior Python Developer & Computer Vision Engineer
-December 2024
+December 2025
