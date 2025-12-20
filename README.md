@@ -1,25 +1,73 @@
-# AI Virtual Mouse Controller
+# AI Virtual Mouse Controller - Two-Hand Edition v5.4
 
-A professional-grade, real-time hand gesture-based mouse controller using computer vision and machine learning.
+A professional-grade, real-time hand gesture-based mouse controller using computer vision and machine learning. This version separates control into two hands for maximum precision and usability:
+- **Left Hand**: Selects the **Mode** (Scroll, Zoom, Volume, etc.)
+- **Right Hand**: Performs the **Action** (Move, Click, Zoom In/Out, Volume Up/Down)
 
 ## Features
 
-- **Real-time Hand Tracking**: Uses MediaPipe for robust hand detection and landmark tracking
+- **Dual Hand Control**: Innovative separation of concerns (Left: Context, Right: Action)
+- **Discrete Gestures**: Reliable, simple gestures for actions instead of finicky continuous tracking
+    - **Zoom**: 1 Finger for Zoom In, 2 Fingers for Zoom Out
+    - **Scroll**: 1 Finger for Scroll Up, 2 Fingers for Scroll Down
+    - **Volume**: 1 Finger for Volume Up, 2 Fingers for Volume Down
+- **Robust Detection**: Relaxed constraints for comfortable use (e.g., Ring finger doesn't need to be perfectly hidden)
+- **Real-time Tracking**: Uses MediaPipe for robust hand detection and landmark tracking
 - **Smooth Cursor Movement**: Implements moving average smoothing to eliminate jitter
-- **Gesture Recognition**: 
-  - Move cursor with index finger
-  - Left click by bringing index and middle fingers together
-  - Right click with three fingers up (index, middle, ring)
-- **Active Region Mapping**: Efficient coordinate mapping from camera view to full screen
-- **Click Debouncing**: Prevents accidental multiple clicks
-- **Visual Feedback**: Real-time display of hand landmarks, active region, FPS, and gesture states
-- **Mirror Mode**: Natural mirrored camera feed (move right to go right)
+- **Active Region Mapping**: 
+    - **Right Hand**: Mapped to the yellow box region (for cursor control)
+    - **Left Hand**: Works anywhere in the full camera view
+- **Visual Feedback**: Real-time display of active modes, gestures, and tracking areas
+
+## gestures Guide
+
+### LEFT HAND (The Activator)
+The Left Hand determines **what mode** you are in. It works anywhere on the screen!
+
+| Gesture | Fingers | Mode | Description |
+| :--- | :--- | :--- | :--- |
+| **Open Hand** | 🖐️ 5 Fingers | **SCROLL MODE** | Use Right Hand to scroll up/down |
+| **Zoom Sign** | 🤘 Thumb + Pinky | **ZOOM MODE** | Use Right Hand to zoom in/out |
+| **Phone Sign** | 🤙 Pinky Only | **VOLUME MODE** | Use Right Hand to adjust volume |
+| **Peace Sign** | ✌️ Index + Middle | **MEDIA MODE** | Control music/video playback |
+| **Rock Sign** | 🤟 Thumb+Index+Pinky | **WINDOW MODE** | Minimize/Maximize/Close windows |
+| **Fist** | ✊ Closed Fist | **PRECISION MODE** | Extra smooth cursor movement |
+| **None** | (Scanning) | **STANDARD MODE** | Normal mouse usage |
+
+### RIGHT HAND (The Action)
+The Right Hand performs the action based on the current mode.
+
+#### 1. Standard Mode (No Special Left Hand Gesture)
+- **Move Cursor**: Point with Index finger (inside yellow box)
+- **Left Click**: ✌️ Two fingers (Index + Middle)
+- **Right Click**: 🤟 Three fingers (Index + Middle + Ring)
+- **Double Click**: 🖐️ Four fingers
+- **Drag & Drop**: 🤏 Pinch Thumb & Index tightly
+
+#### 2. Scroll / Zoom / Volume Modes
+These modes now use the same simple **Discrete Gestures** for consistency:
+
+| Action | Gesture | Scroll Mode | Zoom Mode | Volume Mode |
+| :--- | :--- | :--- | :--- | :--- |
+| **Increase / Up** | 👆 **1 Finger** | Scroll Up | Zoom In | Volume Up |
+| **Decrease / Down** | ✌️ **2 Fingers** | Scroll Down | Zoom Out | Volume Down |
+
+#### 3. Media Mode
+- **Play/Pause**: 👆 1 Finger
+- **Next Track**: ✌️ 2 Fingers
+- **Prev Track**: 🤟 3 Fingers
+
+#### 4. Window Mode
+- **Minimize**: 👆 1 Finger
+- **Maximize**: ✌️ 2 Fingers
+- **Close**: 🤟 3 Fingers
+- **Screenshot**: 🖐️ 4 Fingers
 
 ## System Requirements
 
 - Python 3.8 or higher
 - Webcam
-- Windows, macOS, or Linux
+- Windows (Recommended for full feature support)
 
 ## Installation
 
@@ -35,127 +83,26 @@ pip install -r requirements.txt
 python ai_virtual_mouse.py
 ```
 
-## Usage
+## Usage Tips
 
-### Starting the Application
-
-```bash
-python ai_virtual_mouse.py
-```
-
-### Hand Gestures
-
-1. **Move Cursor**: 
-   - Raise your index finger only
-   - Keep middle finger down
-   - Move within the green active region box
-
-2. **Left Click**: 
-   - Raise both index and middle fingers
-   - Bring the fingertips close together (pinch gesture)
-   - A red line will appear when click is detected
-
-3. **Right Click**: 
-   - Raise index, middle, AND ring fingers simultaneously
-   - This creates a distinct three-finger gesture
-
-### Exiting
-- Press 'q' while the camera window is active
-
-## Configuration
-
-You can customize the behavior by modifying parameters in the `VirtualMouse` class initialization:
-
-```python
-virtual_mouse = VirtualMouse(
-    cam_width=640,              # Camera resolution width
-    cam_height=480,             # Camera resolution height
-    frame_reduction=100,        # Active region padding (pixels)
-    smoothing_factor=5,         # Smoothing buffer size (higher = smoother but slower)
-    click_threshold=30,         # Distance for click detection (pixels)
-    debounce_time=0.3,          # Minimum time between clicks (seconds)
-    dominant_hand='Right'       # 'Right' or 'Left'
-)
-```
-
-## Technical Details
-
-### Coordinate Mapping Logic
-
-The system uses linear interpolation to map camera coordinates to screen coordinates:
-
-```
-screen_x = (cam_x - active_min) / (active_max - active_min) * screen_width
-```
-
-This creates a proportional mapping where:
-- The edges of the active region map to the edges of the screen
-- Small hand movements translate to full cursor range
-- Users don't need to stretch to reach screen edges
-
-### Smoothing Algorithm
-
-A moving average filter is applied to cursor coordinates:
-
-```python
-smooth_x = mean(last_N_x_coordinates)
-smooth_y = mean(last_N_y_coordinates)
-```
-
-This eliminates camera shake and hand tremor while maintaining responsiveness.
-
-### Click Debouncing
-
-Clicks are debounced using time-based filtering:
-- A minimum time interval (default 0.3s) must pass between clicks
-- Prevents gesture recognition noise from causing multiple clicks
-
-## Performance Optimization
-
-The system is optimized for low latency:
-- PyAutoGUI failsafe disabled for faster response
-- Single hand tracking to reduce computational load
-- Efficient coordinate smoothing with deque data structure
-- Direct pixel manipulation without unnecessary processing
+- **Right Hand Area**: Keep your Right Hand inside the **Yellow Box** to move the cursor. 
+- **Left Hand Freedom**: Your Left Hand can be anywhere in the camera view to switch modes.
+- **Lighting**: Ensure good lighting for best hand detection.
+- **Distance**: Sit at a comfortable distance (approx. 50-80cm) from the camera.
 
 ## Troubleshooting
 
-### Camera Not Opening
-- Check if another application is using the webcam
-- Try changing the camera index in `cv2.VideoCapture(0)` to `1` or `2`
+### Zoom Not Working?
+- Ensure you are holding the **Zoom Gesture** (Thumb + Pinky) with your Left Hand first.
+- Then use 1 Finger (Index) on Right Hand to Zoom In, or 2 Fingers to Zoom Out.
 
-### Cursor Not Moving Smoothly
-- Increase `smoothing_factor` for more smoothing (5-10 recommended)
-- Ensure good lighting conditions for better hand detection
-- Keep hand within the green active region box
+### Volume Not Working?
+- Ensure you are holding the **Volume Gesture** (Pinky only) with your Left Hand.
+- Note: We made this easier! You don't need to force your Ring finger down perfectly.
 
-### Clicks Not Registering
-- Adjust `click_threshold` (20-40 recommended)
-- Ensure fingers are clearly visible to the camera
-- Check that `debounce_time` is not too high
-
-### Low FPS
-- Reduce camera resolution
-- Close other applications
-- Ensure GPU drivers are updated (for MediaPipe acceleration)
-
-## Notes on Gesture Design
-
-The right-click gesture uses three fingers (index, middle, ring) rather than thumb pinch because:
-- More reliable detection with MediaPipe
-- More ergonomic and comfortable to perform repeatedly
-- Clear visual distinction from left-click gesture
-- Less prone to false positives
-
-## Library Selection: PyAutoGUI vs AutoPy
-
-This implementation uses **PyAutoGUI** because:
-- Cross-platform compatibility (Windows, macOS, Linux)
-- Active maintenance and community support
-- Built-in safety features
-- Extensive documentation
-
-While AutoPy may have slightly lower latency on some systems, PyAutoGUI provides better reliability and compatibility for production use.
+### Cursor Jittery?
+- Try **Precision Mode** (Left Hand Fist) for smoother control.
+- Adjust `smoothing_factor` in the specific class settings if needed.
 
 ## License
 
